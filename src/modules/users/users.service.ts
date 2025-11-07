@@ -48,11 +48,40 @@ export class UserService {
   }
 
   // ---------------- READ ALL ----------------
-  async findAll(): Promise<ApiResponse<User[]>> {
+  async findAll(): Promise<ApiResponse<any[]>> {
     const users = await this.prisma.user.findMany({
-      include: { userRoles: { include: { role: true } }, language: true },
+      include: {
+        userRoles: {
+          include: {
+            role: true,
+          },
+        },
+        language: true,
+      },
     });
-    const { data, meta, links } = formatList(users, this.basePath);
+
+    const filteredUsers = users.filter(user =>
+      !user.userRoles.some(ur => ur.role.isDeveloper)
+    );
+
+    const sanitizedUsers = filteredUsers.map(user => {
+      const { password, ...restUser } = user;
+      return {
+        ...restUser,
+        userRoles: user.userRoles.map(ur => ({
+          ...ur,
+          role: {
+            id: ur.role.id,
+            name: ur.role.name,
+            description: ur.role.description,
+            createdAt: ur.role.createdAt,
+            updatedAt: ur.role.updatedAt,
+          },
+        })),
+      };
+    });
+
+    const { data, meta, links } = formatList(sanitizedUsers, this.basePath);
     return wrapResponse(data, meta, links);
   }
 
