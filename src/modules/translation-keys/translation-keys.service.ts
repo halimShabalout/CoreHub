@@ -1,8 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { TranslationKey } from '@prisma/client';
-import { CreateTranslationKeyDto } from './dto/create-translation-key.dto';
-import { UpdateTranslationKeyDto } from './dto/update-translation-key.dto';
+import { Prisma, TranslationKey } from '@prisma/client';
 import { wrapResponse, formatSingle, formatList, ApiResponse } from '../../common';
 
 @Injectable()
@@ -12,7 +10,7 @@ export class TranslationKeyService {
   constructor(private readonly prisma: PrismaService) { }
 
   // ---------------- CREATE ----------------
-  async create(data: CreateTranslationKeyDto): Promise<ApiResponse<TranslationKey>> {
+  async create(data: Prisma.TranslationKeyCreateInput): Promise<ApiResponse<TranslationKey>> {
     const translationKey = await this.prisma.translationKey.create({ data });
 
     await this.createTranslationsForAllLanguages(translationKey.id);
@@ -35,7 +33,7 @@ export class TranslationKeyService {
   }
 
   // ---------------- UPDATE ----------------
-  async update(id: number, data: UpdateTranslationKeyDto): Promise<ApiResponse<TranslationKey>> {
+  async update(id: number, data: Prisma.TranslationKeyUpdateInput): Promise<ApiResponse<TranslationKey>> {
     const key = await this.prisma.translationKey.update({ where: { id }, data });
     return wrapResponse(formatSingle(key, this.basePath));
   }

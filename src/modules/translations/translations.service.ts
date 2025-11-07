@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Prisma, Translation } from '@prisma/client';
+import { Translation } from '@prisma/client';
 import { formatSingle, formatList, wrapResponse, ApiResponse } from '../../common';
 import { CreateTranslationDto } from './dto/create-translation.dto';
 import { UpdateTranslationDto } from './dto/update-translation.dto';

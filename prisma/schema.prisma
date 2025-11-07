@@ -19,21 +19,22 @@ datasource db {
 // -----------------------------
 
 model Language {
-  id        Int      @id @default(autoincrement())
-  code      String   @unique
+  id        Int     @id @default(autoincrement())
+  code      String  @unique
   name      String
-  isDefault Boolean  @default(false)
+  isDefault Boolean @default(false)
 
   translations        Translation[]
   dynamicTranslations DynamicTranslation[]
+  users               User[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model TranslationKey {
-  id          Int      @id @default(autoincrement())
-  key         String   @unique
+  id          Int     @id @default(autoincrement())
+  key         String  @unique
   description String?
 
   translations Translation[]
@@ -43,7 +44,7 @@ model TranslationKey {
 }
 
 model Translation {
-  id               Int             @id @default(autoincrement())
+  id               Int    @id @default(autoincrement())
   translationKeyId Int
   languageId       Int
   value            String
@@ -58,7 +59,7 @@ model Translation {
 }
 
 model DynamicTranslation {
-  id         Int      @id @default(autoincrement())
+  id         Int    @id @default(autoincrement())
   tableName  String
   rowId      Int
   field      String
@@ -72,4 +73,73 @@ model DynamicTranslation {
 
   @@unique([tableName, rowId, field, languageId])
   @@index([tableName, rowId, languageId, field])
+}
+
+// -----------------------------
+// Roles && Permissions (Users)
+// -----------------------------
+
+model Role {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique @db.VarChar(100)
+  description String?  @db.VarChar(255)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  rolePermissions RolePermission[]
+  userRoles       UserRole[]
+}
+
+model Permission {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique @db.VarChar(100)
+  endpoint  String   @unique @db.VarChar(100)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  rolePermissions RolePermission[]
+}
+
+model RolePermission {
+  id           Int      @id @default(autoincrement())
+  roleId       Int
+  permissionId Int
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+}
+
+enum UserStatus {
+  active
+  inactive
+}
+
+model User {
+  id        Int        @id @default(autoincrement())
+  username  String     @unique @db.VarChar(50)
+  email     String     @unique @db.VarChar(50)
+  password  String     @db.VarChar(255)
+  status    UserStatus @default(active)
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
+
+  languageId Int?
+  language   Language? @relation(fields: [languageId], references: [id], onDelete: SetNull)
+
+  userRoles UserRole[]
+}
+
+model UserRole {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  roleId    Int
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, roleId])
 }

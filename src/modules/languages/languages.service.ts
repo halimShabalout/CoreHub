@@ -1,9 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Language } from '@prisma/client';
+import { Prisma, Language } from '@prisma/client';
 import { formatSingle, formatList, wrapResponse, ApiResponse } from '../../common';
-import { CreateLanguageDto } from './dto/create-language.dto';
-import { UpdateLanguageDto } from './dto/update-language.dto';
 
 @Injectable()
 export class LanguageService {
@@ -12,7 +10,7 @@ export class LanguageService {
   constructor(private readonly prisma: PrismaService) { }
 
   // ---------------- CREATE ----------------
-  async create(data: CreateLanguageDto): Promise<ApiResponse<Language>> {
+  async create(data: Prisma.LanguageCreateInput): Promise<ApiResponse<Language>> {
     const language = await this.prisma.language.create({ data });
 
     await this.createEmptyTranslationsForLanguage(language.id);
@@ -35,7 +33,7 @@ export class LanguageService {
   }
 
   // ---------------- UPDATE ----------------
-  async update(id: number, data: UpdateLanguageDto): Promise<ApiResponse<Language>> {
+  async update(id: number, data:  Prisma.LanguageUpdateInput): Promise<ApiResponse<Language>> {
     const language = await this.prisma.language.update({ where: { id }, data });
     return wrapResponse(formatSingle(language, this.basePath));
   }
