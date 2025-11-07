@@ -1,0 +1,75 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// -----------------------------
+// Localization (Languages)
+// -----------------------------
+
+model Language {
+  id        Int      @id @default(autoincrement())
+  code      String   @unique
+  name      String
+  isDefault Boolean  @default(false)
+
+  translations        Translation[]
+  dynamicTranslations DynamicTranslation[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TranslationKey {
+  id          Int      @id @default(autoincrement())
+  key         String   @unique
+  description String?
+
+  translations Translation[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Translation {
+  id               Int             @id @default(autoincrement())
+  translationKeyId Int
+  languageId       Int
+  value            String
+
+  TranslationKey TranslationKey @relation(fields: [translationKeyId], references: [id], onDelete: Cascade)
+  Language       Language       @relation(fields: [languageId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([translationKeyId, languageId])
+}
+
+model DynamicTranslation {
+  id         Int      @id @default(autoincrement())
+  tableName  String
+  rowId      Int
+  field      String
+  languageId Int
+  content    String
+
+  Language Language @relation(fields: [languageId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tableName, rowId, field, languageId])
+  @@index([tableName, rowId, languageId, field])
+}
