@@ -36,7 +36,7 @@ export class AuthService {
     });
 
     if (!user) throw new UnauthorizedException('Email not found');
-    
+
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) throw new UnauthorizedException('Password is incorrect');
 
@@ -91,11 +91,19 @@ export class AuthService {
 
     if (!user) throw new NotFoundException('User not found');
 
-    // Extract roles
-    const roles = user.userRoles.map((ur) => ({
-      id: ur.role.id,
-      name: ur.role.name,
-      description: ur.role.description,
+    // Map userRoles to match frontend expectations
+    const userRoles = user.userRoles.map((ur) => ({
+      id: ur.id,
+      userId: ur.userId,
+      roleId: ur.roleId,
+      createdAt: ur.createdAt,
+      role: {
+        id: ur.role.id,
+        name: ur.role.name,
+        description: ur.role.description,
+        createdAt: ur.role.createdAt,
+        updatedAt: ur.role.updatedAt,
+      },
     }));
 
     // Extract permissions (unique)
@@ -125,14 +133,14 @@ export class AuthService {
       username: user.username,
       email: user.email,
       status: user.status,
-      roles,
       language: user.language
         ? {
-          id: user.language.id,
-          code: user.language.code,
-          name: user.language.name,
-        }
+            id: user.language.id,
+            code: user.language.code,
+            name: user.language.name,
+          }
         : null,
+      userRoles,
       permissions,
     };
   }

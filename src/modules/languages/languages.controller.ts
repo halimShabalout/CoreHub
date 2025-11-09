@@ -12,7 +12,7 @@ export class LanguageController {
 
   // ---------------- CREATE ----------------
   @UseGuards(JwtAuthGuard, PermissionsGuard)
-  @Permissions('create_language')
+  @Permissions('/languages/create')
   @Post()
   async create(@Body() data: CreateLanguageDto) {
     return this.languageService.create(data);
@@ -31,6 +31,8 @@ export class LanguageController {
   }
 
   // ---------------- UPDATE ----------------
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions('/languages/update')
   @Patch(':id')
   async update(@Param('id') id: string, @Body() data: UpdateLanguageDto) {
     return this.languageService.update(Number(id), data);
@@ -38,7 +40,7 @@ export class LanguageController {
 
   // ---------------- DELETE ----------------
   @UseGuards(JwtAuthGuard, PermissionsGuard)
-  @Permissions('delete_language')
+  @Permissions('/languages/delete')
   @Delete(':id')
   async remove(@Param('id') id: string) {
     return this.languageService.remove(Number(id));
