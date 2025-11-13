@@ -1,0 +1,17 @@
+import { IsDefined, IsNotEmpty, IsString, MaxLength, IsOptional } from 'class-validator';
+
+export class CreateCategoryDto {
+  @IsDefined({ message: 'Name is required' })
+  @IsNotEmpty({ message: 'Name is required' })
+  @IsString({ message: 'Name must be a string' })
+  @MaxLength(100, { message: 'Name must be shorter than or equal to 100 characters' })
+  name: string;
+
+  @IsOptional()
+  @IsString({ message: 'Description must be a string' })
+  description?: string;
+
+  @IsOptional()
+  @IsString({ message: 'Image URL must be a string' })
+  image_url?: string;
+}
