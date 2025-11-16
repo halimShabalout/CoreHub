@@ -153,4 +153,19 @@ model Category {
   id        Int     @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  Products  Product[]
+}
+
+model Product {
+  id             Int       @id @default(autoincrement())
+  categoryId     Int?
+  stockQuantity  Int       @default(0)
+  isActive       Boolean   @default(true)
+  isFeatured     Boolean   @default(false)
+
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  Category       Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
 }

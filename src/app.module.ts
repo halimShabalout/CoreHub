@@ -14,6 +14,7 @@ import { UsersModule } from './modules/users/users.module';
 import { UserRolesModule } from './modules/user-roles/user-roles.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { CategoryModule } from './modules/categories/categories.module';
+import { ProductModule } from './modules/products/products.module';
 
 @Module({
   imports: [
@@ -29,7 +30,8 @@ import { CategoryModule } from './modules/categories/categories.module';
     UsersModule,
     UserRolesModule,
     AuthModule,
-    CategoryModule
+    CategoryModule,
+    ProductModule
   ],
   controllers: [AppController],
   providers: [AppService],
