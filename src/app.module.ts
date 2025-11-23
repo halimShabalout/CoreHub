@@ -19,6 +19,8 @@ import { ProductImageModule } from './modules/product-images/product-images.modu
 import { HomeSliderModule } from './modules/home-slider/home-slider.module';
 import { AboutUsModule } from './modules/about-us/about-us.module';
 import { ContactRequestModule } from './modules/contact-requests/contact-request.module';
+import { ContactInfoModule } from './modules/contact-info/contact-info.module';
+import { SocialLinkModule } from './modules/social-links/social-link.module';
 
 @Module({
   imports: [
@@ -39,7 +41,9 @@ import { ContactRequestModule } from './modules/contact-requests/contact-request
     ProductImageModule,
     HomeSliderModule,
     AboutUsModule,
-    ContactRequestModule
+    ContactRequestModule,
+    ContactInfoModule,
+    SocialLinkModule
   ],
   controllers: [AppController],
   providers: [AppService],
