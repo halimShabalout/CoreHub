@@ -123,6 +123,8 @@ model User {
   username  String     @unique @db.VarChar(50)
   email     String     @unique @db.VarChar(50)
   password  String     @db.VarChar(255)
+  resetToken        String?
+  resetTokenExpiry  DateTime? 
   status    UserStatus @default(active)
   createdAt DateTime   @default(now()) @map("created_at")
   updatedAt DateTime   @updatedAt @map("updated_at")
