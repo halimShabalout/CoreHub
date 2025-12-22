@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  ParseIntPipe,
+  Query,
+} from '@nestjs/common';
 import { PermissionService } from './permissions.service';
 import { CreatePermissionDto } from './dto/create-permission.dto';
 import { UpdatePermissionDto } from './dto/update-permission.dto';
@@ -9,31 +19,35 @@ export class PermissionController {
 
   // ---------------- CREATE ----------------
   @Post()
-  async create(@Body() data: CreatePermissionDto) {
-    return this.permissionService.create(data);
+  async create(@Body() dto: CreatePermissionDto, @Query('lang') lang: string) {
+    return this.permissionService.create(dto, lang);
   }
 
-  // ---------------- READ ALL ----------------
+  // ---------------- READ ALL BY LANGUAGE ----------------
   @Get()
-  async findAll() {
-    return this.permissionService.findAll();
+  async findAllByLanguage(@Query('lang') lang: string) {
+    return this.permissionService.findAllByLanguage(lang);
   }
 
   // ---------------- READ ONE ----------------
   @Get(':id')
-  async findOne(@Param('id') id: string) {
-    return this.permissionService.findOne(Number(id));
+  async findOne(@Param('id', ParseIntPipe) id: number, @Query('lang') lang?: string) {
+    return this.permissionService.findOne(id, lang);
   }
 
   // ---------------- UPDATE ----------------
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() data: UpdatePermissionDto) {
-    return this.permissionService.update(Number(id), data);
+  async update(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('lang') lang: string,
+    @Body() dto: UpdatePermissionDto,
+  ) {
+    return this.permissionService.update(id, lang, dto);
   }
 
   // ---------------- DELETE ----------------
   @Delete(':id')
-  async remove(@Param('id') id: string) {
-    return this.permissionService.remove(Number(id));
+  async remove(@Param('id', ParseIntPipe) id: number) {
+    return this.permissionService.remove(id);
   }
 }

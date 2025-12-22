@@ -48,7 +48,14 @@ export class UserService {
   }
 
   // ---------------- READ ALL ----------------
-  async findAll(): Promise<ApiResponse<any[]>> {
+  async findAll(langCode: string): Promise<ApiResponse<any[]>> {
+    const language = await this.prisma.language.findUnique({
+      where: { code: langCode },
+    });
+    if (!language) {
+      throw new NotFoundException(`Language '${langCode}' not found`);
+    }
+
     const users = await this.prisma.user.findMany({
       include: {
         userRoles: {
@@ -60,14 +67,63 @@ export class UserService {
       },
     });
 
+    /* ---------------- COLLECT ROLE IDS ---------------- */
+
+    const roleIds = [
+      ...new Set(
+        users.flatMap(user =>
+          user.userRoles.map(ur => ur.roleId)
+        )
+      ),
+    ];
+
+    /* ---------------- FETCH ROLE TRANSLATIONS ---------------- */
+
+    const roleTranslations = await this.prisma.rolePermissionTranslation.findMany({
+      where: {
+        tableName: 'Role',
+        rowId: { in: roleIds },
+        languageId: language.id,
+      },
+    });
+
+    /* ---------------- GROUP TRANSLATIONS ---------------- */
+
+    const translationsMap: Record<
+      number,
+      { name: string; description?: string }
+    > = {};
+
+    for (const t of roleTranslations) {
+      if (!translationsMap[t.rowId]) {
+        translationsMap[t.rowId] = { name: '', description: '' };
+      }
+
+      if (t.field === 'name') {
+        translationsMap[t.rowId].name = t.content;
+      }
+
+      if (t.field === 'description') {
+        translationsMap[t.rowId].description = t.content;
+      }
+    }
+
+    /* ---------------- SANITIZE USERS ---------------- */
 
     const sanitizedUsers = users.map(user => {
       const { password, ...restUser } = user;
+
       return {
         ...restUser,
         userRoles: user.userRoles.map(ur => ({
           ...ur,
-          role: ur.role,
+          role: {
+            ...ur.role,
+            translated: translationsMap[ur.roleId] || {
+              name: '',
+              description: '',
+            },
+          },
         })),
       };
     });

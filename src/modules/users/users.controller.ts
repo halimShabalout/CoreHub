@@ -7,6 +7,7 @@ import {
   Body,
   Param,
   ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 import { UserService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -14,7 +15,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('users')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService) { }
 
   // ---------------- CREATE ----------------
   @Post()
@@ -24,8 +25,8 @@ export class UserController {
 
   // ---------------- READ ALL ----------------
   @Get()
-  async findAll() {
-    return this.userService.findAll();
+  async findAll(@Query('lang') lang: string) {
+    return this.userService.findAll(lang);
   }
 
   // ---------------- READ ONE ----------------
