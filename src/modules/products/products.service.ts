@@ -33,7 +33,6 @@ export class ProductService {
   }
 
   // ---------------- READ ALL BY LANGUAGE ----------------
-  // ---------------- READ ALL BY LANGUAGE ----------------
   async findAllByLanguage(
     langCode: string
   ): Promise<ApiResponse<(Product & { translated: { name: string; slug?: string; description?: string }; mainImage?: string })[]>> {

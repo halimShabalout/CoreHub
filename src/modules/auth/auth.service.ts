@@ -82,9 +82,7 @@ export class AuthService {
             role: {
               include: {
                 rolePermissions: {
-                  include: {
-                    permission: true,
-                  },
+                  include: { permission: true },
                 },
               },
             },
@@ -95,42 +93,70 @@ export class AuthService {
 
     if (!user) throw new NotFoundException('User not found');
 
-    // Map userRoles to match frontend expectations
-    const userRoles = user.userRoles.map((ur) => ({
-      id: ur.id,
-      userId: ur.userId,
-      roleId: ur.roleId,
-      createdAt: ur.createdAt,
-      role: {
-        id: ur.role.id,
-        name: ur.role.name,
-        description: ur.role.description,
-        createdAt: ur.role.createdAt,
-        updatedAt: ur.role.updatedAt,
-      },
-    }));
+    const userLangCode = user.language?.code;
 
-    // Extract permissions (unique)
-    const permissions: {
-      id: number;
-      name: string;
-      endpoint: string;
-    }[] = [];
+    // Map userRoles with translated names
+    const userRoles = await Promise.all(
+      user.userRoles.map(async (ur) => {
+        const translations = await this.prisma.rolePermissionTranslation.findMany({
+          where: { tableName: 'Role', rowId: ur.role.id },
+          include: { Language: true },
+        });
 
-    user.userRoles.forEach((ur) => {
-      ur.role.rolePermissions.forEach((rp) => {
+        let roleName = '';
+        if (userLangCode) {
+          const langTranslation = translations.find(t => t.Language.code === userLangCode);
+          if (langTranslation) roleName = langTranslation.content;
+        }
+        if (!roleName && translations.length > 0) {
+          roleName = translations[0].content;
+        }
+
+        return {
+          id: ur.id,
+          userId: ur.userId,
+          roleId: ur.roleId,
+          createdAt: ur.createdAt,
+          role: {
+            id: ur.role.id,
+            name: roleName,
+            createdAt: ur.role.createdAt,
+            updatedAt: ur.role.updatedAt,
+          },
+        };
+      })
+    );
+
+    // Extract unique permissions with translated names
+    const permissions: { id: number; name: string; endpoint: string }[] = [];
+
+    for (const ur of user.userRoles) {
+      for (const rp of ur.role.rolePermissions) {
         const perm = rp.permission;
 
-        if (!permissions.some((p) => p.id === perm.id)) {
-          permissions.push({
-            id: perm.id,
-            name: perm.name,
-            endpoint: perm.endpoint,
-          });
-        }
-      });
-    });
+        if (permissions.some((p) => p.id === perm.id)) continue;
 
+        const translations = await this.prisma.dynamicTranslation.findMany({
+          where: { tableName: 'Permission', rowId: perm.id },
+          include: { Language: true },
+        });
+
+        let name = '';
+        if (userLangCode) {
+          const langTranslation = translations.find(t => t.Language.code === userLangCode);
+          if (langTranslation) name = langTranslation.content;
+        }
+        if (!name && translations.length > 0) {
+          name = translations[0].content;
+        }
+
+        permissions.push({
+          id: perm.id,
+          name,
+          endpoint: perm.endpoint,
+        });
+      }
+    }
 
     return {
       id: user.id,
@@ -148,6 +174,7 @@ export class AuthService {
       permissions,
     };
   }
+
 
   // ---------------- FORGOT PASSWORD ----------------
   async forgotPassword(email: string) {

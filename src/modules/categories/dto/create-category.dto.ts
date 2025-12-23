@@ -1,5 +1,4 @@
 import { IsDefined, IsNotEmpty, IsString, MaxLength, IsOptional, IsBoolean } from 'class-validator';
-import { Transform } from 'class-transformer';
 
 export class CreateCategoryDto {
   @IsDefined({ message: 'Name is required' })

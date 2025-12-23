@@ -21,6 +21,7 @@ import { AboutUsModule } from './modules/about-us/about-us.module';
 import { ContactRequestModule } from './modules/contact-requests/contact-request.module';
 import { ContactInfoModule } from './modules/contact-info/contact-info.module';
 import { SocialLinkModule } from './modules/social-links/social-link.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -43,7 +44,8 @@ import { SocialLinkModule } from './modules/social-links/social-link.module';
     AboutUsModule,
     ContactRequestModule,
     ContactInfoModule,
-    SocialLinkModule
+    SocialLinkModule,
+    DashboardModule
   ],
   controllers: [AppController],
   providers: [AppService],
